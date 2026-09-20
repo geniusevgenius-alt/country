@@ -3,155 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рабочая 3D Схема участка 40х20м</title>
+    <title>3D Схема участка 40х20м</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
-        #info { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.85); padding: 15px; border-radius: 8px; pointer-events: none; max-width: 400px; line-height: 1.4; z-index: 10; }
-        .legend { margin-top: 8px; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+        #info { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            color: white; 
+            background: rgba(0,0,0,0.85); 
+            padding: 15px; 
+            border-radius: 8px; 
+            pointer-events: none; 
+            max-width: 420px; 
+            line-height: 1.4; 
+            z-index: 10; 
+        }
+        .legend { 
+            margin-top: 8px; 
+            font-size: 13px; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 4px; 
+        }
     </style>
     
-    <!-- Используем строго вашу рабочую проверенную версию -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://jsdelivr.net"></script>
+    <!-- 100% совместимая пара скриптов Three.js и OrbitControls без модулей -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
 </head>
 <body>
 
     <div id="info">
-        <strong>Прокачанный 3D план участка (40х20м)</strong><br>
+        <strong>Интерактивный 3D план участка (40х20м)</strong><br>
         <small style="color: #bbb;">Управление: ЛКМ — вращение | ПКМ — смещение | Колесико — зум</small>
         <div class="legend">
             <div><span style="color:#3e7d32">■</span> Газон (20х40м)</div>
             <div><span style="color:#708090">■</span> Дом + Двускатная крыша</div>
             <div><span style="color:#cd853f">■</span> Беседка с опорами</div>
             <div><span style="color:#ba68c8">■</span> Бытовка (R3:S4)</div>
-            <div><span style="color:#a0e6ff">■</span> Теплица (Прозрачная)</div>
+            <div><span style="color:#a0e6ff">■</span> Теплица (прозрачная)</div>
             <div><span style="color:#f06292">■</span> Туалет (F3)</div>
-            <div><span style="color:#4169e1">■</span> Каналы с водой</div>
+            <div><span style="color:#2196f3">■</span> Каналы / Вода</div>
         </div>
     </div>
 
     <script>
-        window.onload = function() {
-            initThreeJS();
-        };
-
-        function initThreeJS() {
-            // 1. Создание сцены
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. Сцена и визуализатор
             const scene = new THREE.Scene();
             scene.background = new THREE.Color(0x1a1a1a);
 
-            // 2. Создание рендерера
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
 
-            // 3. Настройка камеры и мягкого зума
+            // 2. Камера и плавное управление (OrbitControls)
             const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.set(25, 35, 55); 
+            camera.position.set(26, 36, 56);
 
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true; // Плавное скольжение камеры
+            controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 10;     // Максимальное приближение
-            controls.maxDistance = 120;    // Максимальное удаление
-            controls.target.set(10, 0, 20); // Фокус на центр вашего участка
+            controls.minDistance = 8;
+            controls.maxDistance = 140;
+            controls.target.set(10, 0, 20); // Центр участка (X: 10м, Z: 20м)
 
-            // 4. Реалистичное освещение
+            // 3. Освещение
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.55);
-            sunLight.position.set(30, 50, 20);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.65);
+            sunLight.position.set(25, 45, 20);
             sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
             scene.add(sunLight);
 
-            // Вторичный свет для подсветки теней
-            const blueLight = new THREE.DirectionalLight(0xaaccff, 0.25);
-            blueLight.position.set(-30, 20, -20);
-            scene.add(blueLight);
+            const skyLight = new THREE.DirectionalLight(0x88bbff, 0.3);
+            skyLight.position.set(-25, 20, -20);
+            scene.add(skyLight);
 
-            // 5. Основание (Зеленый газон 20х40 метров)
+            // 4. Газон (основание 20х40 метров)
             const groundGeo = new THREE.PlaneGeometry(20, 40);
             const groundMat = new THREE.MeshStandardMaterial({ color: 0x3e7d32, roughness: 0.9 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
-            ground.position.set(10, 0, 20); 
+            ground.position.set(10, 0, 20);
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // Аккуратная сетка 1х1 метр
+            // Разметка сетки 1х1 метр
             const gridHelper = new THREE.GridHelper(40, 40, 0x274e1f, 0x274e1f);
             gridHelper.position.set(10, 0.01, 20);
             scene.add(gridHelper);
 
-            // Белые контуры для объема объектов
+            // Обводка ребер для четкости объектов
             function addOutline(geometry, meshPosition) {
                 const edges = new THREE.EdgesGeometry(geometry);
-                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2, transparent: true }));
+                const line = new THREE.LineSegments(
+                    edges, 
+                    new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.25, transparent: true })
+                );
                 line.position.copy(meshPosition);
                 scene.add(line);
             }
 
-            // 6. Базовый строительный блок (Бытовка, Туалет)
+            // 5. Простая коробка (Бытовка, Туалет)
             function buildBox(colStart, rowStart, colEnd, rowEnd, height, color) {
-                const width = (colEnd - colStart) + 1; 
-                const depth = (rowEnd - rowStart) + 1; 
-                const geometry = new THREE.BoxGeometry(width, height, depth);
-                const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
-                const mesh = new THREE.Mesh(geometry, material);
-                
+                const width = (colEnd - colStart) + 1;
+                const depth = (rowEnd - rowStart) + 1;
+                const geo = new THREE.BoxGeometry(width, height, depth);
+                const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
+                const mesh = new THREE.Mesh(geo, mat);
+
                 mesh.position.set((colStart - 1) + width / 2, height / 2, (rowStart - 1) + depth / 2);
-                mesh.castShadow = true; mesh.receiveShadow = true;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
                 scene.add(mesh);
-                addOutline(geometry, mesh.position);
+                addOutline(geo, mesh.position);
             }
 
-            // 7. Спец-объект: ДОМ с честной двускатной крышей (без конфликтов шейдеров)
+            // 6. Дом с двускатной крышей
             function buildHouseWithRoof(colStart, rowStart, colEnd, rowEnd) {
-                const width = (colEnd - colStart) + 1; 
-                const depth = (rowEnd - rowStart) + 1; 
+                const width = (colEnd - colStart) + 1;
+                const depth = (rowEnd - rowStart) + 1;
                 const wallHeight = 3.2;
                 const roofHeight = 1.8;
 
                 const posX = (colStart - 1) + width / 2;
                 const posZ = (rowStart - 1) + depth / 2;
 
-                // Стены дома (Серый металлик/сайдинг)
+                // Стены
                 const wallGeo = new THREE.BoxGeometry(width, wallHeight, depth);
                 const wallMat = new THREE.MeshStandardMaterial({ color: 0x708090, roughness: 0.5 });
                 const walls = new THREE.Mesh(wallGeo, wallMat);
                 walls.position.set(posX, wallHeight / 2, posZ);
-                walls.castShadow = true; walls.receiveShadow = true;
+                walls.castShadow = true;
+                walls.receiveShadow = true;
                 scene.add(walls);
                 addOutline(wallGeo, walls.position);
 
-                // Двускатная крыша, построенная вручную из геометрии клина
-                const roofGeo = new THREE.BoxGeometry(width + 0.2, roofHeight, depth + 0.2);
-                
-                // Трансформируем коробку в треугольную призму (сдвигаем верхние вершины к центру)
-                const posAttribute = roofGeo.attributes.position;
-                for (let i = 0; i < posAttribute.count; i++) {
-                    let y = posAttribute.getY(i);
-                    // Если вершина находится в верхней части коробки, стягиваем её к коньку крыши
-                    if (y > 0) {
-                        let z = posAttribute.getZ(i);
-                        // Сдвигаем к центру по продольной оси дома
-                        if (z > 0) posAttribute.setZ(i, 0);
-                        if (z < 0) posAttribute.setZ(i, 0);
-                    }
-                }
-                roofGeo.computeVertexNormals(); // Пересчитываем тени для новой формы
-
+                // Двускатная крыша через треугольную призму (CylinderGeometry с 3 сегментами)
+                const radius = width / Math.sqrt(3);
+                const roofGeo = new THREE.CylinderGeometry(radius, radius, depth, 3);
                 const roofMat = new THREE.MeshStandardMaterial({ color: 0x2f4f4f, roughness: 0.4 });
                 const roof = new THREE.Mesh(roofGeo, roofMat);
+
+                roof.rotation.x = Math.PI / 2;
+                roof.rotation.z = Math.PI / 6;
+                roof.scale.set(1, roofHeight / 1.5, 1);
                 roof.position.set(posX, wallHeight + roofHeight / 2, posZ);
                 roof.castShadow = true;
                 scene.add(roof);
-                addOutline(roofGeo, roof.position);
             }
 
-            // 8. Спец-объект: БЕСЕДКА на открытых деревянных столбах
+            // 7. Беседка на опорных столбах
             function buildGazebo(colStart, rowStart, colEnd, rowEnd) {
                 const width = (colEnd - colStart) + 1;
                 const depth = (rowEnd - rowStart) + 1;
@@ -159,10 +168,10 @@
                 const posX = (colStart - 1) + width / 2;
                 const posZ = (rowStart - 1) + depth / 2;
 
-                // Основание пола беседки
+                // Настил пола
                 buildBox(colStart, rowStart, colEnd, rowEnd, 0.15, 0x8b5a2b);
 
-                // Плоская легкая крыша
+                // Крыша
                 const roofGeo = new THREE.BoxGeometry(width + 0.3, 0.2, depth + 0.3);
                 const roofMat = new THREE.MeshStandardMaterial({ color: 0xcd853f });
                 const roof = new THREE.Mesh(roofGeo, roofMat);
@@ -170,34 +179,45 @@
                 roof.castShadow = true;
                 scene.add(roof);
 
-                // 4 угловых столба
+                // 4 угловые опоры
                 const postGeo = new THREE.BoxGeometry(0.15, height, 0.15);
                 const postMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-                const stepX = width / 2 - 0.1;
-                const stepZ = depth / 2 - 0.1;
-                const positions = [
+                const stepX = width / 2 - 0.12;
+                const stepZ = depth / 2 - 0.12;
+                const offsets = [
                     [-stepX, -stepZ], [stepX, -stepZ],
                     [-stepX, stepZ], [stepX, stepZ]
                 ];
-                positions.forEach(p => {
+                offsets.forEach(([ox, oz]) => {
                     const post = new THREE.Mesh(postGeo, postMat);
-                    post.position.set(posX + p[0], height / 2, posZ + p[1]);
+                    post.position.set(posX + ox, height / 2, posZ + oz);
                     post.castShadow = true;
                     scene.add(post);
                 });
             }
 
-            // 9. Спец-объект: ТЕПЛИЦА из глянцевого поликарбоната
+            // 8. Теплица (полупрозрачный поликарбонат)
             function buildGreenhouse(colStart, rowStart, colEnd, rowEnd) {
                 const width = (colEnd - colStart) + 1;
                 const depth = (rowEnd - rowStart) + 1;
                 const height = 2.0;
 
-                const geometry = new THREE.BoxGeometry(width, height, depth);
-                const material = new THREE.MeshStandardMaterial({ 
+                const geo = new THREE.BoxGeometry(width, height, depth);
+                const mat = new THREE.MeshStandardMaterial({ 
                     color: 0xa0e6ff, 
                     transparent: true, 
                     opacity: 0.55, 
                     roughness: 0.1,
                     metalness: 0.3
                 });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set((colStart - 1) + width / 2, height / 2, (rowStart - 1) + depth / 2);
+                scene.add(mesh);
+                addOutline(geo, mesh.position);
+            }
+
+            // 9. Водные каналы по периметру
+            function buildWater(colStart, rowStart, colEnd, rowEnd) {
+                const width = (colEnd - colStart) + 1;
+                const depth = (rowEnd - rowStart) + 1;
+                const geo = new THREE.PlaneGeometry(width, depth);
