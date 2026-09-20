@@ -5,242 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Схема участка 40х20м</title>
     <style>
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
-        #info { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            color: #ffffff; 
-            background: rgba(0,0,0,0.85); 
-            padding: 14px 18px; 
-            border-radius: 8px; 
-            pointer-events: none; 
-            max-width: 420px; 
-            line-height: 1.4; 
-            z-index: 10; 
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #ui-layer {
+            position: absolute; top: 15px; left: 15px; color: white; 
+            background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 10px; 
+            max-width: 380px; line-height: 1.5; z-index: 100; border: 1px solid #444;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .legend { 
-            margin-top: 8px; 
-            font-size: 13px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 4px 12px; 
+        #error-msg {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #220000; color: #ff6b6b; padding: 40px; box-sizing: border-box;
+            z-index: 9999; font-size: 18px; line-height: 1.6; text-align: center;
         }
+        .legend { margin-top: 12px; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .color-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); }
+        h2 { margin: 0 0 10px 0; font-size: 18px; color: #4caf50; }
+        .hint { font-size: 12px; color: #aaa; margin-top: 15px; border-top: 1px solid #444; padding-top: 10px; }
     </style>
-    <!-- Только одна базовая стабильная библиотека Three.js, работающая на всех серверах -->
-    <script src="https://cloudflare.com"></script>
+    
+    <!-- Максимально надежные CDN для локального открытия -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-    <div id="info">
-        <strong>Интерактивный 3D план участка (40х20м)</strong><br>
-        <small style="color: #bbb;">ЛКМ — вращение | ПКМ — смещение | Колесико — зум</small>
-        <div class="legend">
-            <div><span style="color:#3e7d32">■</span> Газон (20х40м)</div>
-            <div><span style="color:#708090">■</span> Дом + Двускатная крыша</div>
-            <div><span style="color:#cd853f">■</span> Беседка с опорами</div>
-            <div><span style="color:#ba68c8">■</span> Бытовка (R3:S4)</div>
-            <div><span style="color:#4dd0e1">■</span> Теплица (C3:D6)</div>
-            <div><span style="color:#f06292">■</span> Туалет (F3)</div>
-            <div><span style="color:#1e88e5">■</span> Каналы / Вода</div>
+    <div id="error-msg">
+        <h1>⚠️ 3D-движок не загрузился</h1>
+        <p>Браузер заблокировал загрузку библиотек. Это стандартная защита при открытии файлов с диска.</p>
+        <p><strong>Как исправить (выберите один вариант):</strong></p>
+        <ol style="text-align: left; max-width: 600px; margin: 20px auto;">
+            <li>Отключите <strong>AdBlock / uBlock Origin</strong> для этой страницы и обновите (F5).</li>
+            <li>Откройте этот файл в режиме <strong>Инкогнито</strong> (Ctrl+Shift+N).</li>
+            <li>Попробуйте открыть файл в другом браузере (например, Microsoft Edge).</li>
+        </ol>
+    </div>
+
+    <div id="ui-layer">
+        <h2>🏡 Схема участка 40×20 м</h2>
+        <div style="font-size: 13px; color: #ccc; margin-bottom: 10px;">
+            🖱️ ЛКМ — вращение | ПКМ — перемещение | Колесо — зум
         </div>
+        <div class="legend">
+            <div class="legend-item"><div class="color-box" style="background:#3e7d32"></div>Газон (основание)</div>
+            <div class="legend-item"><div class="color-box" style="background:#e0e0e0"></div>Дом 8×8 м (с крышей)</div>
+            <div class="legend-item"><div class="color-box" style="background:#8d6e63"></div>Беседка 5×4 м</div>
+            <div class="legend-item"><div class="color-box" style="background:#607d8b"></div>Бытовка 2×2 м</div>
+            <div class="legend-item"><div class="color-box" style="background:#4fc3f7"></div>Теплица 2×4 м</div>
+            <div class="legend-item"><div class="color-box" style="background:#5d4037"></div>Туалет 1×1 м</div>
+            <div class="legend-item"><div class="color-box" style="background:#1976d2"></div>Водные каналы</div>
+            <div class="legend-item"><div class="color-box" style="background:#5d4037"></div>Забор (фронт)</div>
+        </div>
+        <div class="hint">Масштаб: 1 клетка сетки = 1×1 метр.<br>Координаты строго по файлу "Новая таблица.xlsx"</div>
     </div>
 
     <script>
-        // 1. Сцена и Рендерер
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x181818);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(renderer.domElement);
-
-        // 2. Камера
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-
-        // 3. Встроенный надежный контроллер камеры (Вращение + Зум + Сдвиг)
-        let radius = 60;
-        let theta = 0.5;  // горизонтальный угол
-        let phi = 0.7;    // вертикальный угол
-        const target = new THREE.Vector3(10, 0, 20); // Центр участка (X=10, Z=20)
-
-        function updateCamera() {
-            phi = Math.max(0.05, Math.min(Math.PI / 2.05, phi));
-            radius = Math.max(8, Math.min(150, radius));
-            camera.position.x = target.x + radius * Math.sin(phi) * Math.sin(theta);
-            camera.position.y = target.y + radius * Math.cos(phi);
-            camera.position.z = target.z + radius * Math.sin(phi) * Math.cos(theta);
-            camera.lookAt(target);
+        // Проверка загрузки: если THREE не существует, показываем экран ошибки
+        if (typeof THREE === 'undefined' || typeof THREE.OrbitControls === 'undefined') {
+            document.getElementById('error-msg').style.display = 'block';
+            document.getElementById('ui-layer').style.display = 'none';
+        } else {
+            initScene();
         }
-        updateCamera();
 
-        // Управление мышью
-        let isMouseDown = false;
-        let mouseButton = 0;
-        let prevMouseX = 0;
-        let prevMouseY = 0;
+        function initScene() {
+            // 1. Сцена и рендерер
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+            // Добавляем легкий туман для глубины
+            scene.fog = new THREE.Fog(0x1a1a1a, 30, 90);
 
-        window.addEventListener('contextmenu', e => e.preventDefault());
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
 
-        window.addEventListener('mousedown', e => {
-            isMouseDown = true;
-            mouseButton = e.button;
-            prevMouseX = e.clientX;
-            prevMouseY = e.clientY;
-        });
+            // 2. Камера и управление
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.set(35, 45, 55); // Оптимальный обзор всего участка 20x40
 
-        window.addEventListener('mousemove', e => {
-            if (!isMouseDown) return;
-            const dx = e.clientX - prevMouseX;
-            const dy = e.clientY - prevMouseY;
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 10;
+            controls.maxDistance = 120;
+            controls.target.set(10, 0, 20); // Центр участка
 
-            if (mouseButton === 0) {
-                // ЛКМ: вращение
-                theta -= dx * 0.008;
-                phi -= dy * 0.008;
-            } else if (mouseButton === 2) {
-                // ПКМ: панорамирование (смещение фокуса)
-                const forward = new THREE.Vector3().subVectors(target, camera.position).normalize();
-                const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-                target.addScaledVector(right, -dx * 0.04);
-                target.y += dy * 0.04;
+            // 3. Освещение
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            sunLight.position.set(30, 50, 20);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 150;
+            sunLight.shadow.camera.left = -30;
+            sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50;
+            sunLight.shadow.camera.bottom = -10;
+            scene.add(sunLight);
+
+            // 4. Газон (20x40 м)
+            const groundGeo = new THREE.PlaneGeometry(20, 40);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x3e7d32, roughness: 0.9 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.set(10, 0, 20);
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 5. Сетка 1x1 метр (кастомная для идеального соответствия 20x40)
+            const gridGroup = new THREE.Group();
+            const gridMat = new THREE.LineBasicMaterial({ color: 0x2e5c1e, transparent: true, opacity: 0.4 });
+            for (let x = 0; x <= 20; x++) {
+                const pts = [new THREE.Vector3(x, 0.02, 0), new THREE.Vector3(x, 0.02, 40)];
+                gridGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
             }
-            prevMouseX = e.clientX;
-            prevMouseY = e.clientY;
-            updateCamera();
-        });
+            for (let z = 0; z <= 40; z++) {
+                const pts = [new THREE.Vector3(0, 0.02, z), new THREE.Vector3(20, 0.02, z)];
+                gridGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
+            }
+            scene.add(gridGroup);
 
-        window.addEventListener('mouseup', () => { isMouseDown = false; });
+            // Вспомогательная функция для обводки
+            function addOutline(geometry, position, color = 0xffffff) {
+                const edges = new THREE.EdgesGeometry(geometry);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, opacity: 0.3, transparent: true }));
+                line.position.copy(position);
+                scene.add(line);
+            }
 
-        // Зум колесиком мыши
-        window.addEventListener('wheel', e => {
-            radius += e.deltaY * 0.05;
-            updateCamera();
-        }, { passive: true });
-
-        // 4. Освещение
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.65);
-        sunLight.position.set(25, 45, 20);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        scene.add(sunLight);
-
-        const fillLight = new THREE.DirectionalLight(0x88bbff, 0.25);
-        fillLight.position.set(-25, 25, -20);
-        scene.add(fillLight);
-
-        // 5. Газон 20х40м
-        const groundGeo = new THREE.PlaneGeometry(20, 40);
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x3e7d32, roughness: 0.9 });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.set(10, 0, 20);
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Сетка 1х1 метр
-        const gridHelper = new THREE.GridHelper(40, 40, 0x224422, 0x224422);
-        gridHelper.position.set(10, 0.01, 20);
-        scene.add(gridHelper);
-
-        function addOutline(geometry, meshPosition) {
-            const edges = new THREE.EdgesGeometry(geometry);
-            const line = new THREE.LineSegments(
-                edges,
-                new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.25, transparent: true })
-            );
-            line.position.copy(meshPosition);
-            scene.add(line);
-        }
-
-        // 6. Базовая коробка (Бытовка, Туалет)
-        function buildBox(colStart, rowStart, colEnd, rowEnd, height, color) {
-            const width = (colEnd - colStart) + 1;
-            const depth = (rowEnd - rowStart) + 1;
-            const geo = new THREE.BoxGeometry(width, height, depth);
-            const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
-            const mesh = new THREE.Mesh(geo, mat);
-
-            const posX = (colStart - 1) + width / 2;
-            const posZ = (rowStart - 1) + depth / 2;
-            mesh.position.set(posX, height / 2, posZ);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            addOutline(geo, mesh.position);
-        }
-
-        // 7. Дом с двускатной крышей
-        function buildHouse(colStart, rowStart, colEnd, rowEnd) {
-            const width = (colEnd - colStart) + 1;
-            const depth = (rowEnd - rowStart) + 1;
-            const wallH = 3.2;
-            const roofH = 1.8;
-
-            const posX = (colStart - 1) + width / 2;
-            const posZ = (rowStart - 1) + depth / 2;
-
+            // 6. ДОМ (D28:K35) -> Ширина 8м (кол 4-11), Глубина 8м (ряд 28-35)
+            // Центр X = 3 + 4 = 7. Центр Z = 27 + 4 = 31.
+            const houseX = 7, houseZ = 31;
+            const wallHeight = 3.2;
+            
             // Стены дома
-            const wallGeo = new THREE.BoxGeometry(width, wallH, depth);
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0x708090, roughness: 0.5 });
+            const wallGeo = new THREE.BoxGeometry(8, wallHeight, 8);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.6 });
             const walls = new THREE.Mesh(wallGeo, wallMat);
-            walls.position.set(posX, wallH / 2, posZ);
+            walls.position.set(houseX, wallHeight / 2, houseZ);
             walls.castShadow = true;
             walls.receiveShadow = true;
             scene.add(walls);
-            addOutline(wallGeo, walls.position);
+            addOutline(wallGeo, walls.position, 0x999999);
 
+            // Двускатная крыша (через ExtrudeGeometry для идеальной формы)
+            const roofHeight = 2.0;
+            const roofShape = new THREE.Shape();
+            roofShape.moveTo(-4, 0);       // Левый нижний угол фронтона
+            roofShape.lineTo(4, 0);        // Правый нижний угол
+            roofShape.lineTo(0, roofHeight); // Конек
+            roofShape.lineTo(-4, 0);       // Замыкаем
+            
+            const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: 8, bevelEnabled: false });
+            const roofMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.5 });
+            const roof = new THREE.Mesh(roofGeo, roofMat);
+            // Поворачиваем: исходно экструзия идет по Z, нам нужно, чтобы она шла по X (ширине дома)
+            roof.rotation.y = Math.PI / 2; 
+            roof.position.set(houseX + 4, wallHeight, houseZ - 4); // Корректировка центра после поворота
+            roof.castShadow = true;
+            scene.add(roof);
+
+            // Окна дома (декоративные)
+            const winGeo = new THREE.PlaneGeometry(1.2, 1.2);
+            const winMat = new THREE.MeshStandardMaterial({ color: 0x81d4fa, roughness: 0.1, metalness: 0.5 });
+            const win1 = new THREE.Mesh(winGeo, winMat);
+            win1.position.set(houseX, wallHeight / 2 + 0.2, houseZ + 4.01); // Фасад
+            scene.add(win1);
+            const win2 = win1.clone();
+            win2.position.set(houseX, wallHeight / 2 + 0.2, houseZ - 4.01);
+            win2.rotation.y = Math.PI;
+            scene.add(win2);
+
+            // 7. БЕСЕДКА (F23:J26) -> Ширина 5м (6-10), Глубина 4м (23-26)
+            // Центр X = 5 + 2.5 = 7.5. Центр Z = 22 + 2 = 24.
+            const gazX = 7.5, gazZ = 24;
+            // Пол
+            const gazFloor = new THREE.Mesh(new THREE.BoxGeometry(5, 0.15, 4), new THREE.MeshStandardMaterial({ color: 0x8d6e63 }));
+            gazFloor.position.set(gazX, 0.075, gazZ);
+            gazFloor.receiveShadow = true;
+            scene.add(gazFloor);
             // Крыша
-            const radius = width / Math.sqrt(3);
-            const roofGeo = new THREE.CylinderGeometry(radius, radius, depth, 3);
-            const roofMat = new THREE.MeshStandardMaterial({ color: 0x2f4f4f, roughness: 0.4 });
-            const roof = new THREE.Mesh(roofGeo, roofMat);
-            roof.rotation.x = Math.PI / 2;
-            roof.rotation.z = Math.PI / 6;
-            roof.scale.set(1, roofH / 1.5, 1);
-            roof.position.set(posX, wallH + roofH / 2, posZ);
-            roof.castShadow = true;
-            scene.add(roof);
-        }
-
-        // 8. Беседка
-        function buildGazebo(colStart, rowStart, colEnd, rowEnd) {
-            const width = (colEnd - colStart) + 1;
-            const depth = (rowEnd - rowStart) + 1;
-            const height = 2.4;
-            const posX = (colStart - 1) + width / 2;
-            const posZ = (rowStart - 1) + depth / 2;
-
-            buildBox(colStart, rowStart, colEnd, rowEnd, 0.15, 0x8b5a2b);
-
-            const roofGeo = new THREE.BoxGeometry(width + 0.3, 0.2, depth + 0.3);
-            const roofMat = new THREE.MeshStandardMaterial({ color: 0xcd853f });
-            const roof = new THREE.Mesh(roofGeo, roofMat);
-            roof.position.set(posX, height, posZ);
-            roof.castShadow = true;
-            scene.add(roof);
-
-            const postGeo = new THREE.BoxGeometry(0.15, height, 0.15);
-            const postMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-            const ox = width / 2 - 0.12;
-            const oz = depth / 2 - 0.12;
-            const corners = [[-ox, -oz], [ox, -oz], [-ox, oz], [ox, oz]];
-            corners.forEach(([dx, dz]) => {
+            const gazRoof = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.2, 4.4), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
+            gazRoof.position.set(gazX, 3.0, gazZ);
+            gazRoof.castShadow = true;
+            scene.add(gazRoof);
+            addOutline(new THREE.BoxGeometry(5.4, 0.2, 4.4), gazRoof.position, 0x3e2723);
+            // Столбы
+            const postGeo = new THREE.CylinderGeometry(0.12, 0.12, 3);
+            const postMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+            [[-2.3, -1.8], [2.3, -1.8], [-2.3, 1.8], [2.3, 1.8]].forEach(([ox, oz]) => {
                 const post = new THREE.Mesh(postGeo, postMat);
-                post.position.set(posX + dx, height / 2, posZ + dz);
+                post.position.set(gazX + ox, 1.5, gazZ + oz);
                 post.castShadow = true;
                 scene.add(post);
             });
-        }
 
-        // 9. Теплица
-        function buildGreenhouse(colStart, rowStart, colEnd, rowEnd) {
-            const width = (colEnd - colStart) + 1;
-            const depth = (rowEnd - rowStart) + 1;
+            // 8. ТЕПЛИЦА (C3:D6) -> Ширина 2м (3-4), Глубина 4м (3-6)
+            // Центр X = 2 + 1 = 3. Центр Z = 2 + 2 = 4.
+            const greenX = 3, greenZ = 4;
+            const greenGeo = new THREE.BoxGeometry(2, 2.2, 4);
+            const greenMat = new THREE.MeshStandardMaterial({ 
+                color: 0x4fc3f7, transparent: true, opacity: 0.35, roughness: 0.1, side: THREE.DoubleSide 
+            });
+            const greenhouse = new THREE.Mesh(greenGeo, greenMat);
+            greenhouse.position.set(greenX, 1.1, greenZ);
+            scene.add(greenhouse);
+            addOutline(greenGeo, greenhouse.position, 0xffffff);
+
+            // 9. ТУАЛЕТ (F3) -> 1x1 м. Центр X = 5.5, Z = 2.5
+            const toilet = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 2.2, 1),
+                new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.8 })
+            );
+            toilet.position.set(5.5, 1.1, 2.5);
+            toilet.castShadow = true;
+            scene.add(toilet);
+            addOutline(new THREE.BoxGeometry(1, 2.2, 1), toilet.position, 0x3e2723);
+
+            // 10. БЫТОВКА (R3:S4) -> Ширина 2м (18-19), Глубина 2м (3-4)
+            // Центр X = 17 + 1 = 18. Центр Z = 2 + 1 = 3.
+            const shed = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 2.5, 2),
+                new THREE.MeshStandardMaterial({ color: 0x607d8b, roughness: 0.4, metalness: 0.3 })
+            );
+            shed.position.set(18, 1.25, 3);
+            shed.castShadow = true;
+            scene.add(shed);
+            addOutline(new THREE.BoxGeometry(2, 2.5, 2), shed.position, 0x37474f);
+
+            // 11. ВОДНЫЕ КАНАЛЫ (по периметру)
+            const waterMat = new THREE.MeshStandardMaterial
